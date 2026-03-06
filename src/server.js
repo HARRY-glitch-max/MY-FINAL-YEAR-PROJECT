@@ -9,9 +9,12 @@ import connectDB from "./config/db.js";
 
 // Import routes
 import userRoutes from "./routes/userRoutes.js";
+import employerRoutes from "./routes/employerRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import cvRoutes from "./routes/cvRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 // Import error middleware
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -55,9 +58,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/employers", employerRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/cvs", cvRoutes);
+app.use("/api/chats", chatRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Default route
 app.get("/", (req, res) => {
@@ -75,10 +81,3 @@ const server = app.listen(PORT, () =>
 );
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("Shutting down server...");
-  server.close(() => {
-    console.log("Server closed.");
-    process.exit(0);
-  });
-});

@@ -1,12 +1,13 @@
 import express from "express";
-import multer from "multer";
-import { uploadCV } from "../controllers/cvController.js";
-import protect from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";   // <-- curly braces
+import { uploadCV, getCVs } from "../controllers/cvController.js";
 
 const router = express.Router();
 
-const upload = multer({ dest: "uploads/" });
+// Protected route: only logged-in users can upload CVs
+router.post("/", protect, uploadCV);
 
-router.post("/", protect, upload.single("cv"), uploadCV);
+// Public route: anyone can view CVs
+router.get("/", getCVs);
 
 export default router;
