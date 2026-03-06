@@ -15,6 +15,7 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import cvRoutes from "./routes/cvRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";   // ✅ new
 
 // Import error middleware
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -64,6 +65,7 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/cvs", cvRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/interviews", interviewRoutes);   // ✅ new
 
 // Default route
 app.get("/", (req, res) => {
@@ -81,3 +83,16 @@ const server = app.listen(PORT, () =>
 );
 
 // Graceful shutdown
+import mongoose from "mongoose";
+const shutdown = () => {
+  console.log("Shutting down server...");
+  server.close(() => {
+    console.log("HTTP server closed.");
+    mongoose.connection.close(false, () => {
+      console.log("MongoDB connection closed.");
+      process.exit(0);
+    });
+  });
+};
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

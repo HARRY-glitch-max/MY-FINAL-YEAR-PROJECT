@@ -1,27 +1,27 @@
-import express from "express";
+import express from "express";   // ✅ this line is required
 import {
   createEmployer,
+  loginEmployer,
   getEmployers,
   getEmployerById,
   updateEmployer,
-  deleteEmployer
+  deleteEmployer,
+  shortlistCandidate
 } from "../controllers/employerController.js";
 
 const router = express.Router();
 
-// Create employer
-router.post("/", createEmployer);
+// Register employer
+router.post("/register", createEmployer);
 
-// Get all employers
+// Login employer
+router.post("/login", loginEmployer);
+
+// Other routes
 router.get("/", getEmployers);
-
-// Get employer by ID
 router.get("/:id", getEmployerById);
-
-// Update employer
 router.put("/:id", updateEmployer);
-
-// Delete employer
 router.delete("/:id", deleteEmployer);
+router.put("/applications/:id/shortlist", shortlistCandidate);
 
 export default router;

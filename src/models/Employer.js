@@ -1,14 +1,31 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const employerSchema = new mongoose.Schema({
-  companyName: { type: String, required: true }, // official name of the company
+  companyName: { type: String, required: true },
+  industry: { type: String, required: true },
   contactInformation: {
-    email: { type: String, required: true },     // communication details
+    email: { type: String, required: true },
     phone: { type: String },
     address: { type: String }
   },
-  industry: { type: String, required: true }     // business sector
-}, { timestamps: true });
+  password: { type: String, required: true }
+});
+
+// ✅ Hash password before saving
+employerSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// ✅ Add matchPassword method
+employerSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 const Employer = mongoose.model("Employer", employerSchema);
+
 export default Employer;
