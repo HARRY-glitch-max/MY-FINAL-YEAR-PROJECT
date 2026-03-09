@@ -1,13 +1,13 @@
+// controllers/applicationController.js
+
 import Application from "../models/Application.js";
 
 // Submit a new application
-export const createApplication = async (req, res) => {
+const createApplication = async (req, res) => {
   try {
     const { jobId, userId } = req.body;
-
     const application = new Application({ jobId, userId });
     await application.save();
-
     res.status(201).json({ message: "Application submitted successfully", application });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +15,7 @@ export const createApplication = async (req, res) => {
 };
 
 // Get all applications
-export const getApplications = async (req, res) => {
+const getApplications = async (req, res) => {
   try {
     const applications = await Application.find()
       .populate("jobId", "title")
@@ -27,7 +27,7 @@ export const getApplications = async (req, res) => {
 };
 
 // Get applications for a specific job
-export const getApplicationsByJob = async (req, res) => {
+const getApplicationsByJob = async (req, res) => {
   try {
     const { jobId } = req.params;
     const applications = await Application.find({ jobId })
@@ -39,7 +39,7 @@ export const getApplicationsByJob = async (req, res) => {
 };
 
 // Get applications for a specific user
-export const getApplicationsByUser = async (req, res) => {
+const getApplicationsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const applications = await Application.find({ userId })
@@ -51,16 +51,11 @@ export const getApplicationsByUser = async (req, res) => {
 };
 
 // Update application status
-export const updateApplicationStatus = async (req, res) => {
+const updateApplicationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-
-    const application = await Application.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    const application = await Application.findByIdAndUpdate(id, { status }, { new: true });
 
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
@@ -73,7 +68,7 @@ export const updateApplicationStatus = async (req, res) => {
 };
 
 // Delete application
-export const deleteApplication = async (req, res) => {
+const deleteApplication = async (req, res) => {
   try {
     const { id } = req.params;
     const application = await Application.findByIdAndDelete(id);
@@ -86,4 +81,49 @@ export const deleteApplication = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// Shortlist candidate (update existing row)
+const shortlistCandidate = async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    application.status = "shortlisted";
+    application.shortlistedDate = new Date();
+
+    await application.save();
+
+    res.json({ message: "Candidate shortlisted", application });
+  } catch (error) {
+    console.error("Error shortlisting candidate:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get shortlisted applications for a specific job
+const getShortlistedApplicationsByJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const applications = await Application.find({ jobId, status: "shortlisted" })
+      .populate("userId", "name email");
+    res.json(applications);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Export all functions
+export {
+  createApplication,
+  getApplications,
+  getApplicationsByJob,
+  getApplicationsByUser,
+  updateApplicationStatus,
+  deleteApplication,
+  shortlistCandidate,
+  getShortlistedApplicationsByJob
 };

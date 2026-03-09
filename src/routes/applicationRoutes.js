@@ -1,3 +1,5 @@
+// routes/applicationRoutes.js
+
 import express from "express";
 import {
   createApplication,
@@ -5,7 +7,8 @@ import {
   getApplicationsByJob,
   getApplicationsByUser,
   updateApplicationStatus,
-  deleteApplication
+  deleteApplication,
+  shortlistCandidate
 } from "../controllers/applicationController.js";
 
 const router = express.Router();
@@ -24,6 +27,9 @@ router.get("/user/:userId", getApplicationsByUser);
 
 // Update application status
 router.put("/:id/status", updateApplicationStatus);
+
+// Shortlist candidate
+router.put("/:id/shortlist", shortlistCandidate);
 
 // Delete application
 router.delete("/:id", deleteApplication);

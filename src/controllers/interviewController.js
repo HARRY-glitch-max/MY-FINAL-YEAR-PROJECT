@@ -1,6 +1,7 @@
 import Interview from "../models/Interview.js";
 import Application from "../models/Application.js";
 import Notification from "../models/Notification.js";
+import Job from "../models/Job.js"; // import Job model
 
 // Candidate books interview slot
 export const bookInterview = async (req, res) => {
@@ -25,18 +26,22 @@ export const bookInterview = async (req, res) => {
     });
     await interview.save();
 
-    // Create notifications
+    // Candidate notification
     await Notification.create({
       userId,
       type: "interview",
       content: `Your interview for job ${jobId} has been scheduled on ${preferredDate} at ${location}.`
     });
 
-    await Notification.create({
-      userId: application.employerId,
-      type: "interview",
-      content: `Candidate ${userId} booked an interview for job ${jobId} on ${preferredDate} at ${location}.`
-    });
+    // Employer notification (pulled from Job model)
+    const job = await Job.findById(jobId).populate("employerId", "name email");
+    if (job && job.employerId) {
+      await Notification.create({
+        userId: job.employerId._id,
+        type: "interview",
+        content: `Candidate ${userId} booked an interview for job "${job.title}" on ${preferredDate} at ${location}.`
+      });
+    }
 
     res.status(201).json({ message: "Interview booked successfully", interview });
   } catch (error) {
