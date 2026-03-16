@@ -1,28 +1,25 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  roles: { type: String, enum: ["jobseeker", "employer", "admin"], default: "jobseeker" },
-  bio: { type: String },
-  skills: [{ type: String }],
-  cv: { type: String }
+  employer: { type: mongoose.Schema.Types.ObjectId, ref: "Employer" }
 });
 
-// ✅ Hash password before saving (Option 1: async/await, no next)
-userSchema.pre("save", async function () {
+// ✅ Hash password before saving (async/await style, no next)
+adminSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
 // ✅ Add matchPassword method
-userSchema.methods.matchPassword = async function (enteredPassword) {
+adminSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User = mongoose.model("User", userSchema);
+const Admin = mongoose.model("Admin", adminSchema);
 
-export default User;
+export default Admin;

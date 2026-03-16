@@ -12,10 +12,10 @@ import userRoutes from "./routes/userRoutes.js";
 import employerRoutes from "./routes/employerRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
-import cvRoutes from "./routes/cvRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-import interviewRoutes from "./routes/interviewRoutes.js";   // ✅ new
+import interviewRoutes from "./routes/interviewRoutes.js";   
+import adminRoutes from "./routes/adminRoutes.js";   // ✅ new
 
 // Import error middleware
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -62,10 +62,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/employers", employerRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
-app.use("/api/cvs", cvRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/interviews", interviewRoutes);   // ✅ new
+app.use("/api/interviews", interviewRoutes);
+app.use("/api/admin", adminRoutes);   // ✅ new
 
 // Default route
 app.get("/", (req, res) => {

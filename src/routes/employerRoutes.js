@@ -1,4 +1,4 @@
-import express from "express";   // ✅ this line is required
+import express from "express";
 import {
   createEmployer,
   loginEmployer,
@@ -8,20 +8,21 @@ import {
   deleteEmployer,
   shortlistCandidate
 } from "../controllers/employerController.js";
+import { protect } from "../middleware/authMiddleware.js"; // ✅ use named import
 
 const router = express.Router();
 
-// Register employer
-router.post("/register", createEmployer);
+// Public routes
+router.post("/register", createEmployer);   // Register employer
+router.post("/login", loginEmployer);       // Login employer
 
-// Login employer
-router.post("/login", loginEmployer);
+// Protected routes
+router.get("/", protect, getEmployers);          // Get all employers (admin only ideally)
+router.get("/:id", protect, getEmployerById);    // Get employer by ID
+router.put("/:id", protect, updateEmployer);     // Update employer profile
+router.delete("/:id", protect, deleteEmployer);  // Delete employer
 
-// Other routes
-router.get("/", getEmployers);
-router.get("/:id", getEmployerById);
-router.put("/:id", updateEmployer);
-router.delete("/:id", deleteEmployer);
-router.put("/applications/:id/shortlist", shortlistCandidate);
+// Employer-specific action
+router.put("/applications/:id/shortlist", protect, shortlistCandidate);
 
 export default router;

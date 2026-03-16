@@ -9,14 +9,15 @@ const employerSchema = new mongoose.Schema({
     phone: { type: String },
     address: { type: String }
   },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+
+  // 🔑 Reference to Admin
+  admin: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" }
 });
 
-// ✅ Hash password before saving
-employerSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
+// ✅ Hash password before saving (Option 1: async/await, no next)
+employerSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

@@ -1,11 +1,10 @@
-// routes/applicationRoutes.js
-
 import express from "express";
 import {
   createApplication,
   getApplications,
   getApplicationsByJob,
   getApplicationsByUser,
+  getApplicationById,        // ✅ new
   updateApplicationStatus,
   deleteApplication,
   shortlistCandidate
@@ -24,6 +23,9 @@ router.get("/job/:jobId", getApplicationsByJob);
 
 // Get applications by user
 router.get("/user/:userId", getApplicationsByUser);
+
+// Get application by ID
+router.get("/:id", getApplicationById);   // ✅ new
 
 // Update application status
 router.put("/:id/status", updateApplicationStatus);
