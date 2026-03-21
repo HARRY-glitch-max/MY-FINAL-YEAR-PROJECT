@@ -16,6 +16,7 @@ import chatRoutes from "./routes/chatRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import interviewRoutes from "./routes/interviewRoutes.js";   
 import adminRoutes from "./routes/adminRoutes.js";   // ✅ new
+import testRoutes from "./routes/testRoutes.js";     // ✅ added
 
 // Import error middleware
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -65,7 +66,8 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/interviews", interviewRoutes);
-app.use("/api/admin", adminRoutes);   // ✅ new
+app.use("/api/admin", adminRoutes);   
+app.use("/api/test", testRoutes);     // ✅ new test route
 
 // Default route
 app.get("/", (req, res) => {

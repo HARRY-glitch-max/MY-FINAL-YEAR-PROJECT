@@ -1,10 +1,11 @@
 import express from "express";
+import uploadModule from "../middleware/multer.js"; // CommonJS interop
 import {
   createApplication,
   getApplications,
   getApplicationsByJob,
   getApplicationsByUser,
-  getApplicationById,        // ✅ new
+  getApplicationById,
   updateApplicationStatus,
   deleteApplication,
   shortlistCandidate
@@ -12,28 +13,25 @@ import {
 
 const router = express.Router();
 
-// Submit application
-router.post("/", createApplication);
+// Normalize CommonJS export
+const upload = uploadModule.default || uploadModule;
 
-// Get all applications
+/**
+ * --- 📄 Application Submission ---
+ * Added upload.single("resume") middleware.
+ * "resume" is the field name you must use in Postman (form-data).
+ */
+router.post("/", upload.single("resume"), createApplication);
+
+// --- 🔍 Retrieval Routes ---
 router.get("/", getApplications);
-
-// Get applications by job
 router.get("/job/:jobId", getApplicationsByJob);
-
-// Get applications by user
 router.get("/user/:userId", getApplicationsByUser);
+router.get("/:id", getApplicationById);
 
-// Get application by ID
-router.get("/:id", getApplicationById);   // ✅ new
-
-// Update application status
+// --- ⚙️ Management Routes ---
 router.put("/:id/status", updateApplicationStatus);
-
-// Shortlist candidate
 router.put("/:id/shortlist", shortlistCandidate);
-
-// Delete application
 router.delete("/:id", deleteApplication);
 
 export default router;

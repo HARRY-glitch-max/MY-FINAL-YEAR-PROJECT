@@ -1,21 +1,53 @@
 import Job from "../models/Job.js";
+import Notification from "../models/Notification.js";
+import User from "../models/User.js"; // assuming jobseekers are stored in User model
+import { notifyJobseeker } from "../utils/notifyJobseeker.js";
+
+// Helper to notify all jobseekers
+const notifyAllJobseekers = async (job, type, message, subject) => {
+  const jobseekers = await User.find({}, "name email"); // adjust query to target specific jobseekers
+  for (const seeker of jobseekers) {
+    // 🔔 Save notification in DB
+    await Notification.create({
+      userId: seeker._id,
+      type,
+      content: message,
+    });
+
+    // 📧 Send email
+    await notifyJobseeker({
+      email: seeker.email,
+      name: seeker.name,
+      subject,
+      message,
+    });
+  }
+};
 
 // Create a new job
-export const createJob = async (req, res) => {
+const createJob = async (req, res) => {
   try {
     const { employerId, title, description, requirements } = req.body;
 
     const job = new Job({ employerId, title, description, requirements });
     await job.save();
 
-    res.status(201).json({ message: "Job created successfully", job });
+    // 🔔 + 📧 Notify jobseekers
+    await notifyAllJobseekers(
+      job,
+      "job_posting",
+      `A new job "${job.title}" has been posted.`,
+      "New Job Alert"
+    );
+
+    res.status(201).json({ message: "Job created successfully and notifications sent", job });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Get all jobs
-export const getJobs = async (req, res) => {
+const getJobs = async (req, res) => {
   try {
     const jobs = await Job.find().populate("employerId", "companyName industry");
     res.json(jobs);
@@ -25,7 +57,7 @@ export const getJobs = async (req, res) => {
 };
 
 // Get job by ID
-export const getJobById = async (req, res) => {
+const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id).populate("employerId", "companyName industry");
     if (!job) {
@@ -38,27 +70,56 @@ export const getJobById = async (req, res) => {
 };
 
 // Update job
-export const updateJob = async (req, res) => {
+const updateJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate("employerId", "companyName");
+
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-    res.json({ message: "Job updated successfully", job });
+
+    // 🔔 + 📧 Notify jobseekers
+    await notifyAllJobseekers(
+      job,
+      "job_update",
+      `The job "${job.title}" has been updated by ${job.employerId.companyName}.`,
+      "Job Update Notification"
+    );
+
+    res.json({ message: "Job updated successfully and notifications sent", job });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Delete job
-export const deleteJob = async (req, res) => {
+const deleteJob = async (req, res) => {
   try {
     const job = await Job.findByIdAndDelete(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-    res.json({ message: "Job deleted successfully" });
+
+    // 🔔 + 📧 Notify jobseekers
+    await notifyAllJobseekers(
+      job,
+      "job_delete",
+      `The job "${job.title}" has been removed.`,
+      "Job Removed Notification"
+    );
+
+    res.json({ message: "Job deleted successfully and notifications sent" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// ✅ Export all functions
+export {
+  createJob,
+  getJobs,
+  getJobById,
+  updateJob,
+  deleteJob
 };

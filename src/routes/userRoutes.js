@@ -6,7 +6,8 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  getUserProfile
+  getUserProfile,
+  notifyJobseekerById
 } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -32,5 +33,8 @@ router.delete("/:id", deleteUser);
 
 // Protected route: Get logged-in user profile
 router.get("/profile/me", protect, getUserProfile);
+
+// Notify a jobseeker by ID
+router.post("/notify/:id", notifyJobseekerById);
 
 export default router;

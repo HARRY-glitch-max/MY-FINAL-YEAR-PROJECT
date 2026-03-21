@@ -1,6 +1,7 @@
 // controllers/userController.js
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js"; // helper for JWT
+import { notifyJobseeker } from "../utils/notifyJobseeker.js"; // email utility
 
 // Register user
 export const registerUser = async (req, res) => {
@@ -66,11 +67,10 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// Update user profile (role-aware with bio)
+// Update user profile (role-aware with bio, skills, cv)
 export const updateUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Common fields
@@ -82,6 +82,9 @@ export const updateUser = async (req, res) => {
       user.bio = req.body.bio || user.bio;
       user.skills = req.body.skills || user.skills;
       user.cv = req.body.cv || user.cv;
+    } else if (user.roles === "employer") {
+      user.company = req.body.company || user.company;
+      user.industry = req.body.industry || user.industry;
     }
 
     const updatedUser = await user.save();
@@ -108,6 +111,30 @@ export const getUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Notify a jobseeker by ID (email integration)
+export const notifyJobseekerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subject, message } = req.body;
+
+    const user = await User.findById(id).select("-password");
+    if (!user || user.roles !== "jobseeker") {
+      return res.status(404).json({ message: "Jobseeker not found" });
+    }
+
+    await notifyJobseeker({
+      email: user.email,
+      name: user.name,
+      subject,
+      message,
+    });
+
+    res.status(200).json({ success: true, message: `Notification sent to ${user.email}` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
